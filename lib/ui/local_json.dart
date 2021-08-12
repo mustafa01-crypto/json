@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:localjson/constants.dart';
 import '../core/models/person_model.dart';
 
 class LocalJson extends StatefulWidget {
@@ -32,6 +33,9 @@ class _LocalJsonState extends State<LocalJson> {
     loadLocalJson();
   }
 
+  final dataKey = new GlobalKey();
+  final _controller = ScrollController();
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -45,90 +49,118 @@ class _LocalJsonState extends State<LocalJson> {
   }
 
   Widget listItems(BuildContext context, List<Person> list) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
+    return Stack(
       children: [
-        Expanded(
-          flex: 3,
+        Container(
+          color: Colors.blueAccent,
+          height: 170,
+          width: MediaQuery.of(context).size.width,
+        ),
+        Container(
+          height: 220,
           child: ListView.builder(
             shrinkWrap: true,
             scrollDirection: Axis.horizontal,
             itemCount: list.length,
             itemBuilder: (BuildContext context, index) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              child: Container(
-                color: Colors.blue,
-
+              padding: const EdgeInsets.symmetric(vertical: 60),
+              child: Card(
                   child: list[index].parentId == null
-                      ? Card(
-                        child: Image.network(
-                            list[index].picture,
-                            width: 100,
-                            height: 100,
+                      ? InkWell(
+                          onTap: () {
+                            _animateToIndex(index);
+                          },
+                          child: Card(
+                            child: Image.network(
+                              list[index].picture,
+                              width: 100,
+                              height: 100,
+                            ),
                           ),
-                      )
+                        )
                       : null),
             ),
           ),
         ),
-        Divider(thickness: 2,color: Colors.grey,),
-        Expanded(
-          flex: 10,
+        // Divider(thickness: 2,color: Colors.grey,),
+        Padding(
+          padding: EdgeInsets.only(
+            top: MediaQuery.of(context).size.height * 3 / 13,
+          ),
           child: ListView.builder(
+            controller: _controller,
             itemCount: list.length,
             shrinkWrap: true,
-            itemBuilder: (BuildContext context, int index){
+           // physics: const ClampingScrollPhysics(),
+            itemBuilder: (BuildContext context, int index) {
               return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 4),
-                child:  Column(
+                padding: EdgeInsets.symmetric(
+                    horizontal: MediaQuery.of(context).size.width * 1 / 10,
+                    ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(list[index].parentId ==null? list[index].name : ""),
-                    list[index].parentId !=null ?  Container(
-                      width: MediaQuery.of(context).size.width * 4 / 5,
-                      height: 135,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(8),
-                            topRight: Radius.circular(8),
-                            bottomLeft: Radius.circular(8),
-                            bottomRight: Radius.circular(8)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 3,
-                            blurRadius: 5,
-                            offset: Offset(0, 2), // changes position of shadow
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Image.network(
-                            list[index].picture,
-                            width: 100,
+                    SizedBox(height: 15,),
+                    Text(
+                      list[index].parentId == null ? list[index].name : "",
+                      style: grey,
+                    ),
+
+                    list[index].parentId != null
+                        ? Container(
+                            width: MediaQuery.of(context).size.width * 4 / 5,
                             height: 135,
-                          ),
-                          Center(
-                              child: Padding(
-                                padding: EdgeInsets.only(
-                                    left: MediaQuery.of(context).size.width * 1 / 6),
-                                child: Text(list[index].name),
-                              )),
-                        ],
-                      ),
-                    ) : SizedBox(),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(8),
+                                  topRight: Radius.circular(8),
+                                  bottomLeft: Radius.circular(8),
+                                  bottomRight: Radius.circular(8)),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  spreadRadius: 3,
+                                  blurRadius: 5,
+                                  offset: Offset(
+                                      0, 2), // changes position of shadow
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Image.network(
+                                  list[index].picture,
+                                  width: 100,
+                                  height: 135,
+                                ),
+                                Center(
+                                    child: Padding(
+                                  padding: EdgeInsets.only(
+                                      left: MediaQuery.of(context).size.width *
+                                          1 /
+                                          6),
+                                  child: Text(
+                                    list[index].name,
+                                    style: black,
+                                  ),
+                                )),
+                              ],
+                            ),
+                          )
+                        : SizedBox(),
                   ],
-                ) ,
+                ),
               );
             },
           ),
         ),
-        SizedBox(
-          height: 10,
-        )
+
       ],
     );
   }
+
+  _animateToIndex(i) => _controller.animateTo(152.0 * i,
+      duration: Duration(seconds: 2), curve: Curves.fastOutSlowIn);
 }
